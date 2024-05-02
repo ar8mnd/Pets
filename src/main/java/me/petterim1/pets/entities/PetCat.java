@@ -1,20 +1,22 @@
 package me.petterim1.pets.entities;
 
 import cn.nukkit.Player;
-import cn.nukkit.entity.data.IntEntityData;
-import cn.nukkit.entity.passive.EntityCat;
+import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.IChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import me.petterim1.pets.EntityPet;
 import me.petterim1.pets.Utils;
+import org.jetbrains.annotations.NotNull;
+import cn.nukkit.entity.data.EntityFlag;
+import cn.nukkit.entity.data.EntityDataTypes;
 
-public class PetCat extends EntityPet {
+public class PetCat extends EntityPet implements CustomEntity {
 
     protected int type;
 
-    public PetCat(FullChunk chunk, CompoundTag nbt) {
+    public PetCat(IChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
     }
 
@@ -23,22 +25,27 @@ public class PetCat extends EntityPet {
         super.initEntity();
 
         this.sitting = this.namedTag.getBoolean("Sitting");
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_SITTING, this.isSitting());
+        this.setDataFlag(EntityFlag.SITTING, this.isSitting());
 
         this.type = this.namedTag.getInt("CatType");
-        this.setDataProperty(new IntEntityData(DATA_VARIANT, this.type));
+        this.setDataProperty(EntityDataTypes.VARIANT, this.type);
 
         this.pitch = 100;
     }
 
-    @Override
-    public int getNetworkId() {
-        return EntityCat.NETWORK_ID;
-    }
+//    @Override
+//    public int getNetworkId() {
+//        return EntityCat.NETWORK_ID;
+//    }
 
     @Override
     public float getWidth() {
         return 0.6f;
+    }
+
+    @Override
+    public @NotNull String getIdentifier() {
+        return "minecraft:petcat";
     }
 
     @Override
@@ -47,8 +54,8 @@ public class PetCat extends EntityPet {
     }
 
     @Override
-    protected boolean isFeedItem(int id) {
-        return id == Item.RAW_FISH || id == Item.RAW_SALMON || id == Item.CLOWNFISH;
+    protected boolean isFeedItem(String id) {
+        return id == Item.TROPICAL_FISH || id == Item.SALMON;
     }
 
     @Override
@@ -66,7 +73,7 @@ public class PetCat extends EntityPet {
     @Override
     public void setRandomType() {
         this.type = Utils.rand(1, 3);
-        this.setDataProperty(new IntEntityData(DATA_VARIANT, this.type));
+        this.setDataProperty(EntityDataTypes.VARIANT, this.type);
         this.saveNBT();
     }
 
@@ -85,6 +92,6 @@ public class PetCat extends EntityPet {
 
     @Override
     protected String getSaveName() {
-        return "Cat";
+        return "cat";
     }
 }

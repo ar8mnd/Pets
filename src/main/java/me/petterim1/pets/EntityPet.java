@@ -5,9 +5,9 @@ import cn.nukkit.block.*;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.inventory.PlayerInventory;
+import cn.nukkit.inventory.HumanInventory;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.IChunk;
 import cn.nukkit.level.particle.CriticalParticle;
 import cn.nukkit.level.particle.HeartParticle;
 import cn.nukkit.level.particle.ItemBreakParticle;
@@ -15,6 +15,7 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.entity.data.EntityFlag;
 
 public abstract class EntityPet extends EntityCreature {
 
@@ -26,12 +27,12 @@ public abstract class EntityPet extends EntityCreature {
     protected boolean findingPlayer;
     protected boolean sitting;
 
-    public EntityPet(FullChunk chunk, CompoundTag nbt) {
+    public EntityPet(IChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
         this.setOwner(nbt.getString("Owner"));
         this.setNameTagVisible(true);
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_TAMED, true);
+        this.setDataFlag(EntityFlag.TAMED, true);
 
         this.pitch = 0;
     }
@@ -71,7 +72,7 @@ public abstract class EntityPet extends EntityCreature {
                 item));
 
         this.inLoveTicks = 10;
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_INLOVE);
+        this.setDataFlag(EntityFlag.IN_LOVE);
     }
 
     public boolean isOwner(Player p) {
@@ -96,7 +97,7 @@ public abstract class EntityPet extends EntityCreature {
     private boolean distanceCheck(double distance) {
         boolean dis = distance < 400 && distance > 36;
 
-        PlayerInventory inv;
+        HumanInventory inv;
         if (this.target instanceof Player && (inv = ((Player) this.target).getInventory()) != null && this.isFeedItem(inv.getItemInHand().getId())) { //feed item
             dis = true;
         }
@@ -108,7 +109,7 @@ public abstract class EntityPet extends EntityCreature {
         return dis || findingPlayer;
     }
 
-    protected boolean isFeedItem(int id) {
+    protected boolean isFeedItem(String id) {
         return false;
     }
 
@@ -120,11 +121,11 @@ public abstract class EntityPet extends EntityCreature {
 
         if (this.namedTag.getByte("Sitting") == 0) {
             this.namedTag.putByte("Sitting", 1);
-            this.setDataFlag(DATA_FLAGS, DATA_FLAG_SITTING, true);
+            this.setDataFlag(EntityFlag.SITTING, true);
             this.sitting = true;
         } else {
             this.namedTag.putByte("Sitting", 0);
-            this.setDataFlag(DATA_FLAGS, DATA_FLAG_SITTING, false);
+            this.setDataFlag(EntityFlag.SITTING, false);
             this.sitting = false;
         }
 
@@ -188,11 +189,11 @@ public abstract class EntityPet extends EntityCreature {
 
     protected boolean checkJump(double dx, double dz) {
         if (this.motionY == 0.16) {
-            int b = Utils.getBlockId(level, chunk, NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z));
-            return b == BlockID.WATER || b == BlockID.STILL_WATER;
+            String b = Utils.getBlockId(level, chunk, NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z));
+            return b == BlockID.WATER || b == BlockID.FLOWING_WATER;
         } else {
-            int b = Utils.getBlockId(level, chunk, NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z));
-            if (b == BlockID.WATER || b == BlockID.STILL_WATER) {
+            String b = Utils.getBlockId(level, chunk, NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z));
+            if (b == BlockID.WATER || b == BlockID.FLOWING_WATER) {
                 this.motionY = 0.16;
                 return true;
             }
@@ -224,7 +225,7 @@ public abstract class EntityPet extends EntityCreature {
     public void updateMove(int tickDiff) {
         if (this.isSitting()) {
             if (this.onGround) {
-                if (Utils.getBlockId(level, chunk, getFloorX(), getFloorY() - 1, getFloorZ()) == 0) {
+                if (Utils.getBlockId(level, chunk, getFloorX(), getFloorY() - 1, getFloorZ()) == "minecraft:air") {
                     this.onGround = false;
                 }
             }

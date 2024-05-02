@@ -11,6 +11,9 @@ import cn.nukkit.event.entity.EntitySpawnEvent;
 import cn.nukkit.event.player.PlayerTeleportEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.registry.RegisterException;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Config;
 import me.petterim1.pets.entities.*;
 
@@ -131,7 +134,7 @@ public class Main extends PluginBase implements Listener {
                         return true;
                     }
 
-                    Entity ent = Entity.createEntity("Pet" + args[args.length - 1], pl);
+                    Entity ent = Entity.createEntity("minecraft:pet" + args[args.length - 1], pl);
                     if (ent != null) {
                         if (!(ent instanceof EntityPet)) {
                             ent.close();
@@ -254,7 +257,7 @@ public class Main extends PluginBase implements Listener {
     }
 
     private static void sendPetsList(CommandSender sender) {
-        sender.sendMessage("§d>> §aAvailable pets: §6Cat, Chicken, Cow, Dog, Fox, Pig, PolarBear, Sheep");
+        sender.sendMessage("§d>> §aAvailable pets: §6cat, chicken, cow, dog, fox, pig, polarBear, sheep");
     }
 
     private static void sendCommandList(CommandSender sender) {
@@ -267,7 +270,7 @@ public class Main extends PluginBase implements Listener {
 
     public boolean hasPet(String player) {
         String cfgSE = config.getString("players." + player.toLowerCase());
-        return cfgSE.equals("Cat") || cfgSE.equals("Chicken") || cfgSE.equals("Cow") || cfgSE.equals("Dog") || cfgSE.equals("Fox") || cfgSE.equals("Pig") || cfgSE.equals("PolarBear") || cfgSE.equals("Sheep");
+        return cfgSE.equals("cat") || cfgSE.equals("chicken") || cfgSE.equals("cow") || cfgSE.equals("dog") || cfgSE.equals("fox") || cfgSE.equals("pig") || cfgSE.equals("polarBear") || cfgSE.equals("sheep");
     }
 
     public boolean hasPet(String player, String pet) {
@@ -275,14 +278,11 @@ public class Main extends PluginBase implements Listener {
     }
 
     private void registerPets() {
-        Entity.registerEntity("PetCat", PetCat.class);
-        Entity.registerEntity("PetChicken", PetChicken.class);
-        Entity.registerEntity("PetCow", PetCow.class);
-        Entity.registerEntity("PetDog", PetDog.class);
-        Entity.registerEntity("PetFox", PetFox.class);
-        Entity.registerEntity("PetPig", PetPig.class);
-        Entity.registerEntity("PetPolarBear", PetPolarBear.class);
-        Entity.registerEntity("PetSheep", PetSheep.class);
+        try {
+            Registries.ENTITY.registerCustomEntity(this, new EntityRegistry.CustomEntityDefinition("minecraft:petcat", "", false, true), PetCat.class);
+        } catch (RegisterException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getNameTagColor() {
